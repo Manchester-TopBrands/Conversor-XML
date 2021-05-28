@@ -1,165 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x"
-      crossorigin="anonymous"
-    />
-    <title>XML PARA EXCELL</title>
-  </head>
-  <body>
-    <div .container 100%>
-      <h1>Utilizar XML para EXCELL</h1>
-      <span clsdd="crumbBox">Código Produto(XML) / Código Ean / Descrição do Produto / NCM / Quantidade / Valor Unitário / Código Linx / Código de barras</span>
-    
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous" />
+  <title>XML PARA EXCELL</title>
+</head>
+
+<body>
+  <div .container 100%>
+    <h1>Utilizar XML para EXCELL</h1>
+    <span clsdd="crumbBox">Código Produto(XML) / Código Ean / Descrição do Produto / NCM / Quantidade / Valor Unitário /
+      Código Linx / Código de barras</span>
+
     <div class="row g-3">
       <div class="col-12">
-      <div class="col-12"></div></div>
+        <div class="col-12"></div>
+      </div>
     </div>
-      
+
     <div class="container" style="background:#149cd9;height: 350px;width: 50%;border-radius: 20px;margin-top: 70px;">
       <div class="row justify-content-center align-items-center">
         <form>
           <div class="form-group" style="margin-top: 100px;">
             <label for="formGroupExampleInput"></label>
-            <input class="form-control" type="file" id="file" style="border-radius: 10px;"/>
+            <input class="form-control" type="file" id="file" style="border-radius: 10px;" />
           </div>
         </form>
-        <div class="row justify-content-center align-items-center"><button  style="width:50%;height:50px;border-radius: 10px;margin-top: 40px;" onclick="enviar()">enviar</button></div>
-      </div>  
+        <div class="row justify-content-center align-items-center"><button
+            style="width:50%;height:50px;border-radius: 10px;margin-top: 40px;" onclick="enviar()">enviar</button></div>
+      </div>
     </div>
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://code.jquery.com/jquery-3.2.1.min.js"
-      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
-      crossorigin="anonymous"
-    ></script>
+      crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script>
-      function downloadFile(data) {
-        console.log(data)
-        var binString = window.atob(data)
-        console.log(data[0])
-        console.log(data[data.length-1])
-
-        var len = data.length
-        var bytes = new Uint8Array(len)
-        for (var i = 0; i<len; i++) {
-          bytes[i] = binString.charCodeAt(i)
-        }
-        var val = bytes.buffer
-        var blob = new Blob([val], { type: "octet/stream" })
-        var a = document.createElement("a");
-        var url = window.URL.createObjectURL(blob)
-        a.href = url
-        a.download = "data.xlsx"
-        a.click()
-        window.URL.revokeObjectURL(url)
+      function rest(body) {
+        var myInit = {
+          method: 'POST',
+          headers: new Headers(),
+          mode: 'cors',
+          cache: 'default',
+          body: body,
+        };
+        fetch('http://localhost:8080/oi', myInit) //fetch('http://localhost:8080/add', myInit)
+          .then((response) => {
+            return new Promise((resolve) => {
+              response.blob().then((b) => resolve({ filename: response.headers.get("File-Name"), myBlob: b }))
+            })
+          })
+          .then(({ filename, myBlob }) => {
+            var a = document.createElement('a');
+            var url = window.URL.createObjectURL(myBlob)
+            a.href = url
+            a.download = filename || "data.xlsx"
+            a.click()
+            a.remove()
+            window.URL.revokeObjectURL(url)
+          });
       }
 
       function enviar() {
         var input = document.getElementById("file");
-        console.log(input);
-        for (var i = 0; i < input.files.length; i++) {
+        if (input.files.length > 0) {
           let formData = new FormData();
-          formData.append("file", input.files[i], input.files[i].name);
-          axios
-            .post(
-              "http://localhost:8080/add", //http://179.100.89.83:8888:/photos/add
-              formData,
-              { headers: { "Content-Type": "application/vnd.ms-excel" } }
-            )
-            .then(function (data) {
-              console.log(data);
-              downloadFile(data.data)
-            })
-            .catch(function () {
-              console.log("FAILURE!!");
-            });
+          formData.append("file", input.files[0], input.files[0].name);
+          rest(formData)
         }
       }
-
-      $(document).on("click", "#btnEnviarDados", function () {
-        // pegando os dados
-        var vFile = $("#file");
-
-        console.log(vFile);
-        return;
-        // criando as variáveis
-        var vUrl = "http://localhost:8080/add";
-        var vData = { file: vFile };
-
-        $.post(
-          vUrl, //Required URL of the page on server
-          vData,
-          function (response, status) {
-            // tratando o status de retorno. Sucesso significa que o envio e retorno foi executado com sucesso.
-            if (status == "success") {
-              // pegando os dados jSON
-              var obj = jQuery.parseJSON(response);
-
-              $("#result").html("Arquivo enviado: " + obj.file + "<br>");
-            }
-          }
-        );
-      });
     </script>
-    <!--  <script>
+</body>
 
-    function sendFile() { 
-        let formData = new FormData();
-        formData.append('file', this.file, this.file.name);
-        return  axios.post(
-            "http://localhost:8080/add", //http://179.100.89.83:8888:/photos/add
-            formData,
-            {headers: { 'Content-Type': 'multipart/form-data'}}    
-        ).then(function(data) {
-          return data.data;
-        })
-        .catch(function(){
-          console.log('FAILURE!!');
-        })
-    }
-
-
-    function handleFileUpload() {
-        console.log(this.file)
-     // this.file = this.$refs.file.files[0];
-    };
-    function saveProduct() {
-      this.submitFile().then((filePath)=> {
-      console.log(filePath);
-      a.file = filePath; 
-        })
-    };
-        $.ajax({
-
-          type: "POST",
-          url: ("http://localhost:8080/qualquercoisa"),
-          data: this.file,
-          success: function(data) { 
-            console.log('dados inseridos com sucesso')
-          },
-        });
-        </script> -->
-    <!-- Option 2: Separate Popper and Bootstrap JS -->
-    <!--
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.min.js" integrity="sha384-Atwg2Pkwv9vp0ygtn1JAojH0nYbwNJLPhwyoVbhoPwBhjQPR5VtM2+xf0Uwh9KtT" crossorigin="anonymous"></script>
-    -->
-  </body>
 </html>

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
@@ -41,21 +39,40 @@ type DataFormat struct {
 func main() {
 
 	http.HandleFunc("/oi", handler2)
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/add", handler)
 	http.ListenAndServe(":8080", nil)
 
 }
 
 func handler2(w http.ResponseWriter, r *http.Request) {
-	file, _ := ioutil.ReadFile("serv.xlsx")
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	ioutil.WriteFile(header.Filename, b, 0766)
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Write(file)
+	w.Header().Set("access-control-expose-headers", "*")
+	w.Header().Set("Content-Type", "application/octet-stream")
+
+	fn := strings.Split(header.Filename, ".")
+	if len(fn) > 1 {
+		fn[len(fn)-1] = "xlsx"
+	}
+	w.Header().Set("File-Name", strings.Join(fn, "."))
+	w.Write(b)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-
-	file, _, err := r.FormFile("file")
+	file, header, err := r.FormFile("file")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
@@ -67,20 +84,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := xmlUnMarshal(b)
-	f := ConvertXlsx(data)
+	f := convertXlsx(data)
 
-	bytess := bytes.NewBuffer([]byte{})
-
-	f.Write(bytess)
-
-	b64s := base64.StdEncoding.EncodeToString(bytess.Bytes())
-	//	pretty.Println(data)
-	//ioutil.WriteFile(header.Filename, b, 0766)
-
-	w.Header().Set("Content-Type", "application/vnd.ms-excel")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Write([]byte(b64s))
-	f.Save("serv.xlsx")
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("access-control-expose-headers", "*")
+	w.Header().Set("Content-Type", "application/octet-stream")
+
+	fn := strings.Split(header.Filename, ".")
+	if len(fn) > 1 {
+		fn[len(fn)-1] = "xlsx"
+	}
+	w.Header().Set("File-Name", strings.Join(fn, "."))
+	f.Write(w)
 }
 
 func xmlUnMarshal(b []byte) DataFormat {
@@ -93,7 +109,7 @@ func xmlUnMarshal(b []byte) DataFormat {
 	return data
 }
 
-func ConvertXlsx(d DataFormat) *xlsx.File {
+func convertXlsx(d DataFormat) *xlsx.File {
 
 	gtin := make([]string, 0)
 	for _, product := range d.NFe.InfNFe.Det {
@@ -147,8 +163,6 @@ func ConvertXlsx(d DataFormat) *xlsx.File {
 
 		}
 	}
-
-	//f.Save("server.xlsx")
 
 	return f
 
