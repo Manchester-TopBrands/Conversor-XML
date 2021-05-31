@@ -1,0 +1,8 @@
+api:
+  host: 187.74.10.160
+  port: 8888
+sql:
+  host: 179.183.30.186
+  port: 3215
+  user: produtostbfg
+  password: 0ZRtYoqx!|P%@

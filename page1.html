@@ -54,7 +54,7 @@
           cache: 'default',
           body: body,
         };
-        fetch('http://localhost:8080/oi', myInit) //fetch('http://localhost:8080/add', myInit)
+        fetch('http://{{.Host}}:{{.Port}}/xml', myInit)
           .then((response) => {
             return new Promise((resolve) => {
               response.blob().then((b) => resolve({ filename: response.headers.get("File-Name"), myBlob: b }))
