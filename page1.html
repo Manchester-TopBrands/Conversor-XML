@@ -32,8 +32,11 @@
             <input class="form-control" type="file" id="file" style="border-radius: 10px;" />
           </div>
         </form>
-        <div class="row justify-content-center align-items-center"><button
-            style="width:50%;height:50px;border-radius: 10px;margin-top: 40px;" onclick="enviar()">enviar</button></div>
+        <div class="column justify-content-center align-items-center"><button
+            style="width:50%;height:50px;border-radius: 10px;margin-top: 40px;" onclick="adicionar()">adicionar</button>
+            <button
+            style="width:50%;height:50px;border-radius: 10px;margin-top: 40px;" onclick="enviar()">enviar</button>
+          </div>
       </div>
     </div>
     <!-- Optional JavaScript; choose one of the two! -->
@@ -54,7 +57,7 @@
           cache: 'default',
           body: body,
         };
-        fetch('http://{{.Host}}:{{.Port}}/xml', myInit)
+        fetch('http://localhost:8888/xml', myInit)
           .then((response) => {
             return new Promise((resolve) => {
               response.blob().then((b) => resolve({ filename: response.headers.get("File-Name"), myBlob: b }))
@@ -70,16 +73,31 @@
             window.URL.revokeObjectURL(url)
           });
       }
-
-      function enviar() {
+      var files = [];
+      var filesName=[];
+      function adicionar() {
         var input = document.getElementById("file");
+        console.log(input.files.length)
         if (input.files.length > 0) {
           let formData = new FormData();
           formData.append("file", input.files[0], input.files[0].name);
-          rest(formData)
+          console.log(formData);
+          filesName.push(input.files[0].name)
+          files.push(formData);  
         }
+       
       }
+      function enviar() {
+        for (var i = 0; i < files.length; i++) {
+          console.log(i);
+          console.log(files[i])
+          rest(files[i]);   // more statements
+       }
+      
+      }
+       
+      
     </script>
 </body>
-
+ 
 </html>

@@ -2,7 +2,7 @@ api:
   host: 187.74.10.160
   port: 8888
 sql:
-  host: 179.183.30.186
-  port: 3215
+  host: 10.58.192.51
+  port: 1433
   user: produtostbfg
-  password: 0ZRtYoqx!|P%@
+  password: Luccasantos10@

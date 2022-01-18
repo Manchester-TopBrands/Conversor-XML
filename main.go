@@ -123,7 +123,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 // }
 
 func apiHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("new request")
+
 	file, header, err := r.FormFile("file")
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
@@ -159,6 +159,19 @@ func xmlUnMarshal(b []byte) DataFormat {
 		fmt.Println("Error unmarshalling from XML", err)
 	}
 	return data
+}
+
+//Itens ...
+type Itens struct {
+	CodNfe          string `json:"cod_nfe,omitempty"`
+	CodEan          string `json:"cod_ean,omitempty"`
+	DescProduto     string `json:"desc_produto,omitempty"`
+	Ncm             string `json:"ncm,omitempty"`
+	Quantidade      string `json:"quantidade,omitempty"`
+	ValorUni        string `json:"valor_uni,omitempty"`
+	CodLinx         string `json:"cod_linx,omitempty"`
+	DescProdutoLinx string `json:"desc_produto_linx,omitempty"`
+	CodBarras       string `json:"cod_barras,omitempty"`
 }
 
 func convertXlsx(d DataFormat) *xlsx.File {
